@@ -2,6 +2,8 @@
 
 ## Programmable markets, played like chess
 
+**Documentation:** https://magnum-inc.gitbook.io/rook/
+
 Rook turns a market rule into a constrained onchain move. You choose the position, simulate the line, define exactly what the automation may do, and retain the power to pause or revoke it.
 
 > **Status:** Rook is an experimental Robinhood Chain testnet preview. Strategy records are stored locally in the browser and activation does not move funds until an audited vault and venue adapter are configured.
