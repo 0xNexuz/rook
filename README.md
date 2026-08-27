@@ -1,87 +1,107 @@
 # Rook
 
-**Programmable markets on Robinhood Chain.** Rook turns a market rule into a constrained automation: create it, simulate it, define exactly what it may spend, activate it, and observe every result.
+## Programmable markets, played like chess
 
-## Why it exists
+Rook turns a market rule into a constrained onchain move. You choose the position, simulate the line, define exactly what the automation may do, and retain the power to pause or revoke it.
 
-Tokenized assets are programmable, but most automation products expose either trading-terminal complexity or unsafe blanket wallet authority. Rook uses sentence-like rules and a permission vault so the interface and contract enforce the same limits.
+> **Status:** Rook is an experimental Robinhood Chain testnet preview. Strategy records are stored locally in the browser and activation does not move funds until an audited vault and venue adapter are configured.
 
-## Robinhood Chain integration
+## Documentation
 
-- Mainnet: chain ID `4663`; testnet: `46630`; ETH is the native gas token.
-- Asset metadata and current quotes: Robinhood's read-only Stock Token API. Missing values stay unavailable—Rook never synthesizes them.
-- Stock Tokens are ERC-20 tokens with ERC-8056 UI multipliers. The onchain Chainlink feed is already multiplier-adjusted.
-- Account abstraction path: ERC-4337/EIP-7702 with Alchemy or ZeroDev session/spend policies. The current preview uses an injected EVM wallet and testnet network request; production AA credentials are intentionally absent.
-- Execution venues must be explicitly verified and allowlisted. No router address is hardcoded in this repository.
+| Guide | What it covers |
+| --- | --- |
+| [Getting started](#getting-started) | Create, simulate, and activate a first strategy |
+| [Strategy model](#strategy-model) | Conditions, actions, limits, and chess notation |
+| [Architecture](docs/ARCHITECTURE.md) | Frontend, evaluator, vault, adapter, and data boundaries |
+| [Security](docs/SECURITY.md) | User guarantees and production requirements |
+| [Demo runbook](docs/DEMO.md) | A complete product walkthrough |
+| [Contract](contracts/src/StrategyVault.sol) | The onchain permission boundary |
 
-## Architecture
+## The board
 
-```mermaid
-flowchart LR
-  UI[Next.js product] --> API[Robinhood API proxy]
-  API --> RH[Stock Token API]
-  UI --> W[Wallet / smart account]
-  O[Robinhood Chainlink feed] --> E[Condition evaluator]
-  E --> X[Execution request]
-  W --> V[StrategyVault]
-  X --> V
-  V --> A[Allowlisted adapter]
-  A --> D[Verified venue]
-```
+| Piece | Product role |
+| --- | --- |
+| ♔ King | Your wallet and final authority |
+| ♛ Queen | The market and available liquidity |
+| ♜ Rook | The constrained automation vault |
+| ♝ Bishop | Permission validation |
+| ♞ Knight | The condition evaluator |
+| ♟ Pawn | A market observation or execution action |
 
-Condition observation is separate from authorization. An executor can request execution, but `StrategyVault` independently checks executor/adapter allowlists, status, expiry, exact oracle observation, freshness, per-execution cap, total allocation, and available funded balance.
+## Getting started
 
-## Strategy lifecycle
+### 1. Create an opening
 
-1. **Create** a condition and action.
-2. **Simulate** deterministically; no historical claims are made without a verified dataset.
-3. **Fund / authorize** a bounded amount and expiry.
-4. **Activate** through a testnet wallet or smart-account policy.
-5. **Observe**, pause, or revoke. Revocation returns the remaining vault balance.
+Open **Create** and define one clear rule:
 
-## Local setup
+> When **condition** is true for **asset**, perform **action** within **limits**.
 
-Requirements: Node.js 22.13+, npm, and Foundry for contract work.
+Choose a supported asset, a trigger, **BUY**, **SELL**, or **NOTIFY**, and the maximum amount for one execution.
 
-```bash
-cp .env.example .env.local
-npm install
-npm run dev
-```
+### 2. Analyze the line
 
-The app is available at `http://localhost:3000`. Do not put private keys in any `NEXT_PUBLIC_` variable.
+Select **Simulate**. The deterministic preview shows the condition check, market check, rule match, permission check, and requested result. It does not claim historical performance without a verified historical dataset.
 
-## Environment variables
+### 3. Castle the permission
 
-See `.env.example`. Frontend defaults are the documented Robinhood Chain testnet values. `DEPLOYER_PRIVATE_KEY`, provider keys, gas-policy IDs, and a deployed vault address are operator-supplied and never committed.
+Set a maximum total allocation and an expiry. The Rook may use only the named asset, action, and limits. It never receives unrestricted wallet authority.
 
-## Contracts and testnet deployment
+### 4. Activate and observe
 
-```bash
+Connect an injected EVM wallet and approve Robinhood Chain Testnet, chain ID **46630**. Open **My Rooks** to pause, resume, or revoke the device-local preview.
+
+## Strategy model
+
+### Conditions
+
+| Condition | Meaning | Production requirement |
+| --- | --- | --- |
+| Falls below | Price is below an absolute threshold | Fresh onchain oracle |
+| Rises above | Price is above an absolute threshold | Fresh onchain oracle |
+| Falls by % | Price declined from a reference observation | Authenticated checkpoint |
+| Rises by % | Price increased from a reference observation | Authenticated checkpoint |
+| Every Monday | Recurring schedule | Trusted scheduler plus market checks |
+
+### Actions
+
+* **BUY** — spend no more than the execution and total caps to acquire the selected asset.
+* **SELL** — sell only the selected asset and never more than the configured cap.
+* **NOTIFY** — observe the condition without moving funds.
+
+### Chess notation
+
+* A **position** is the complete strategy configuration.
+* A **move** is one evaluated execution request.
+* A **legal move** passes oracle, condition, expiry, adapter, and spend checks.
+* **Check** is a risk condition requiring attention.
+* To **resign** is to revoke the strategy and recover its unused vault balance.
+
+## API reference
+
+### GET /api/market
+
+Returns supported Robinhood assets enriched with current quotes. The proxy uses documented, read-only Robinhood endpoints and never synthesizes missing prices or addresses.
+
+### GET /api/market?symbol=NVDA
+
+Returns the upstream price payload for one uppercased symbol.
+
+Successful responses use a short public cache window. Upstream failures return an explicit 502 or 503 response.
+
+## Contract workflow
+
+~~~bash
 forge build
 forge test
+~~~
+
+Deploy only after configuring a reviewed administrator, oracle feeds, heartbeats, sequencer checks, and audited venue adapters.
+
+~~~bash
 forge create contracts/src/StrategyVault.sol:StrategyVault \
-  --rpc-url "$ROBINHOOD_RPC_URL" --private-key "$DEPLOYER_PRIVATE_KEY" \
+  --rpc-url "$ROBINHOOD_RPC_URL" \
+  --private-key "$DEPLOYER_PRIVATE_KEY" \
   --constructor-args <ADMIN_ADDRESS>
-```
+~~~
 
-Verify the deployed source against `https://explorer.testnet.chain.robinhood.com/api/`. Before any public deployment, replace the single admin with a reviewed multisig/timelock, audit every adapter, and configure per-feed heartbeats plus the L2 sequencer uptime check.
-
-## Testing
-
-```bash
-npm run lint
-npm run build
-forge test
-```
-
-The Foundry suite covers owner withdrawal/revocation, executor authorization, spend caps, and stale-oracle rejection.
-
-## Known limitations
-
-- The hosted product is an honest testnet preview: strategy records persist locally in the browser, and activation does not submit a deployment transaction until `NEXT_PUBLIC_STRATEGY_VAULT_ADDRESS` and an audited venue adapter are configured.
-- Robinhood's Stock Token API supplies current metadata/quotes, not historical backtests or 24-hour change in this implementation.
-- Stock Tokens are restricted financial instruments and are unavailable in several jurisdictions. Rook is not investment advice and does not bypass issuer or venue eligibility controls.
-- `PercentageRise` and `PercentageFall` require a signed reference observation/checkpoint design before production execution; the included vault fully validates absolute price conditions and treats recurring evaluation separately.
-
-Read [architecture](docs/ARCHITECTURE.md), [security](docs/SECURITY.md), and the [demo runbook](docs/DEMO.md).
+Never commit private keys. Rook is not investment advice and does not bypass issuer or venue eligibility controls.
