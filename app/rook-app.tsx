@@ -44,7 +44,7 @@ function ChessBoard({ asset, action, compact = false }: { asset: string; action:
 
 function Nav({ view, setView, wallet, connect }: { view: View; setView: (v: View) => void; wallet: string; connect: () => void }) {
   return <nav className="nav-shell" aria-label="Primary navigation">
-    <button className="brand plain-button" onClick={() => setView('home')} aria-label="Rook home"><span className="brand-mark" aria-hidden="true"/><span className="brand-word">ROOK</span></button>
+    <button className="brand plain-button" onClick={() => setView('home')} aria-label="Rook home"><img className="nav-logo" src="/rook-mark.png" alt=""/><span className="brand-word">ROOK</span></button>
     <div className="nav-links">{(['market', 'create', 'rooks', 'explore'] as View[]).map(v => <button className={view === v ? 'nav-active' : ''} key={v} onClick={() => setView(v)}>{v === 'rooks' ? 'My Rooks' : v[0].toUpperCase() + v.slice(1)}</button>)}</div>
     <button className="wallet-button" type="button" onClick={connect}>{wallet || 'Connect wallet'}</button>
   </nav>;
@@ -77,25 +77,30 @@ function Home(p: RuleProps & { setView:(v:View)=>void }) {
     ['03','PERMIT','Set a hard spend ceiling and permission expiry.'],
     ['04','EXECUTE','Rook moves only when every guardrail passes.'],
   ];
+  const pieces = [
+    ['♜','THE ROOK','Executes the bounded action only after every rule and permission check passes.'],
+    ['♛','THE ORACLE','Supplies the verified market signal that starts each strategy evaluation.'],
+    ['♝','THE GUARD','Rejects stale prices, unhealthy network state, and out-of-bounds moves.'],
+    ['♞','THE TRIGGER','Turns your condition into deterministic, inspectable strategy logic.'],
+    ['♟','THE LIMIT','Caps each execution, total allocation, and the lifetime of permission.'],
+    ['♔','THE OWNER','You remain the final authority: activate, pause, edit, or revoke at any time.'],
+  ];
   return <div className="home-v2">
-    <section className="command-hero">
-      <div className="hero-serial"><span>ROOK / PROGRAMMABLE_MARKETS</span><span>SYS.001</span></div>
-      <h1>PROGRAM.<br/><span>POSITION.</span></h1>
-      <div className="signal-map" aria-label="Rook automation flow">
-        <div className="signal-stack"><span>MARKET SIGNAL</span><span>PRICE ORACLE</span><span>YOUR LIMITS</span></div>
-        <i/><div className="signal-core"><span className="brand-mark"/><b>R</b><small>RULE ENGINE</small></div><i/>
-        <div className="signal-stack output"><span>VALIDATE</span><span>EXECUTE</span><span>RECORD</span></div>
+    <section className="command-hero cinematic-hero">
+      <div className="cinematic-visual" aria-hidden="true"><img src="/hero-rook-web3.png" alt=""/><span/></div>
+      <div className="hero-serial"><span>ROOK / ROBINHOOD_CHAIN</span><span>WEB3 AUTOMATION · 001</span></div>
+      <div className="cinematic-copy">
+        <div className="hero-brand-lockup"><img src="/rook-mark.png" alt=""/><span>ROOK PROTOCOL</span></div>
+        <p className="cinematic-kicker"><i/> PROGRAMMABLE MARKETS</p>
+        <h1>COMMAND<br/><span>THE MOVE.</span></h1>
+        <p>Turn market intent into a guarded onchain position. Build the rule, simulate every outcome, and authorize only the move you want Rook to make.</p>
+        <div className="hero-actions hero-actions-v2"><button className="primary-button" onClick={()=>p.setView('create')}>BUILD YOUR ROOK <span>→</span></button><button className="system-link" onClick={()=>p.setView('explore')}>EXPLORE STRATEGIES ↗</button></div>
       </div>
-      <div className="hero-intro">
-        <p className="hero-wordmark">rook<span>.</span></p>
-        <p>Programmable market positions for tokenized assets. Define the signal, bound the action, and let Rook execute the legal move on Robinhood Chain.</p>
-      </div>
-      <div className="hero-actions hero-actions-v2"><button className="primary-button" onClick={()=>p.setView('create')}>CREATE A ROOK <span>→</span></button><button className="system-link" onClick={()=>p.setView('explore')}>EXPLORE STRATEGIES ↗</button></div>
-      <div className="hero-safety"><span>● SYSTEM READY</span><span>SIMULATE BEFORE SIGNING</span><span>REVOCABLE PERMISSIONS</span></div>
+      <div className="cinematic-footer"><span>01 / SIGNAL</span><span>02 / SIMULATE</span><span>03 / PERMISSION</span><span>04 / EXECUTE</span></div>
     </section>
 
     <section className="system-section control-section">
-      <div className="section-rail"><span>// SECTION: CONTROL_SURFACE</span><i/><b>004</b></div>
+      <div className="section-rail"><span>{'// SECTION: CONTROL_SURFACE'}</span><i/><b>004</b></div>
       <div className="control-console">
         <div className="console-heading"><span>ROOK_TERMINAL.SYS</span><span>LIVE STRATEGY PREVIEW</span><span>POSITION: {p.asset}/{p.action}</span></div>
         <div className="console-grid"><ChessBoard asset={p.asset} action={p.action}/><RuleCard {...p}/></div>
@@ -109,22 +114,28 @@ function Home(p: RuleProps & { setView:(v:View)=>void }) {
     </section>
 
     <section className="system-section about-section">
-      <div className="section-rail"><span>// SECTION: ABOUT_ROOK</span><i/><b>005</b></div>
+      <div className="section-rail"><span>{'// SECTION: ABOUT_ROOK'}</span><i/><b>005</b></div>
       <div className="about-grid">
-        <div className="rook-schematic"><div className="schematic-label"><span>RENDER: STRATEGY_ENGINE.OBJ</span><b>VERIFIED</b></div><div className="rook-tower" aria-hidden="true"><i/><i/><i/><i/><strong>R</strong></div><div className="schematic-foot"><span>CHAIN: ROBINHOOD</span><span>MODE: NON-CUSTODIAL</span></div></div>
+        <div className="rook-schematic"><div className="schematic-label"><span>RENDER: ROOK_ENGINE.WIREFRAME</span><b>VERIFIED</b></div><div className="wireframe-media"><img src="/reference-wireframe-rook.png" alt="Technical wireframe study of the Rook strategy engine"/><img className="wireframe-logo" src="/rook-mark.png" alt=""/></div><div className="schematic-foot"><span>CHAIN: ROBINHOOD</span><span>MODE: NON-CUSTODIAL</span></div></div>
         <div className="about-copy"><div className="file-bar"><span>PROGRAMMABLE_MARKETS.MD</span><span>V1.0.0</span></div><h2>Market intent becomes<br/><em>bounded execution.</em></h2><p>Most automation products ask for broad access and hide the path between a signal and a trade. Rook makes the entire position legible before anything is activated.</p><p>Choose an asset, define a condition, simulate the result, and grant only the permission that strategy needs. If the oracle is stale, the network is unhealthy, or a limit would be exceeded, the move is rejected.</p><div className="proof-strip"><span>LEGAL MOVE:</span><strong>VALIDATED BEFORE EXECUTION</strong></div><div className="about-stats"><div><span>ASSET_SCOPE</span><b>1 Rule</b></div><div><span>MAX_SPEND</span><b>Hard cap</b></div><div><span>PERMISSION</span><b>Revocable</b></div><div><span>FAILURE_MODE</span><b>Reject</b></div></div></div>
       </div>
     </section>
 
+    <section className="system-section pieces-section">
+      <div className="section-rail"><span>{'// SECTION: STRATEGY_PIECES'}</span><i/><b>005.5</b></div>
+      <div className="pieces-heading"><span>THE ROOK SYSTEM</span><h2>EVERY PIECE<br/><em>HAS ONE JOB.</em></h2><p>A composable Web3 execution system where signals, permissions, safety checks, and owner control remain visibly separated.</p></div>
+      <div className="pieces-grid">{pieces.map(([glyph,title,copy],i)=><article key={title}><div className="piece-visual"><span>{glyph}</span><i>0{i+1}</i></div><div><small>PROTOCOL MODULE</small><h3>{title}</h3><p>{copy}</p><b>INSPECT MODULE <span>↗</span></b></div></article>)}</div>
+    </section>
+
     <section className="system-section flow-section">
-      <div className="section-rail"><span>// SECTION: EXECUTION_FLOW</span><i/><b>006</b></div>
+      <div className="section-rail"><span>{'// SECTION: EXECUTION_FLOW'}</span><i/><b>006</b></div>
       <div className="flow-heading"><div><h2>HOW ROOK WORKS</h2><p>Four visible stages from market idea to constrained onchain action.</p></div><span><i/> POSITION INTEGRITY: 100%</span></div>
       <div className="flow-grid">{flow.map(([n,t,c],i)=><article className={i===2?'flow-card flow-card-dark':'flow-card'} key={t}><div className="flow-card-top"><span>STEP_{n}</span><b>{t}</b></div><strong>{n}</strong><h3>{t} THE MOVE</h3><p>{c}</p><ul>{i===0?<><li>Tokenized stocks and ETFs</li><li>Plain-language conditions</li><li>Explicit action amount</li></>:i===1?<><li>Deterministic preview</li><li>Oracle health check</li><li>No funds are moved</li></>:i===2?<><li>Per-execution ceiling</li><li>Total allocation limit</li><li>Time-bounded access</li></>:<><li>All checks must pass</li><li>Transparent position state</li><li>Pause or revoke anytime</li></>}</ul><button onClick={()=>p.setView(i===0?'create':i===1?'create':i===2?'create':'rooks')}>{i===3?'VIEW MY ROOKS':'OPEN BUILDER'} <span>→</span></button></article>)}</div>
       <div className="failure-rule">* NO SILENT FALLBACKS: WHEN A SAFETY CHECK FAILS, ROOK DOES NOT EXECUTE.</div>
     </section>
 
     <section className="ecosystem-tape"><span>ROBINHOOD CHAIN</span><span>STOCK TOKENS</span><span>BOUNDED PERMISSIONS</span><span>ORACLE CHECKS</span><span>SIMULATION</span><span>REVOCABLE ACCESS</span></section>
-    <section className="final-command"><div><span>READY / YOUR_MOVE</span><h2>Build a position<br/>you can explain.</h2></div><button className="primary-button" onClick={()=>p.setView('create')}>PROGRAM YOUR ROOK <span>→</span></button></section>
+    <section className="final-command"><div><img src="/rook-mark.png" alt=""/><span>READY / YOUR_MOVE</span><h2>Build a position<br/>you can explain.</h2></div><button className="primary-button" onClick={()=>p.setView('create')}>PROGRAM YOUR ROOK <span>→</span></button></section>
   </div>;
 }
 
