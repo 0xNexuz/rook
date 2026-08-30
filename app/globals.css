@@ -900,3 +900,180 @@ footer { border-color:rgba(255,255,255,.14);background:#050505;color:rgba(255,25
   .nav-shell{top:8px;width:calc(100% - 16px);height:60px;margin-top:8px;padding-inline:10px}.brand{gap:7px}.nav-logo{width:31px;height:25px}.brand-word{font-size:9px!important;letter-spacing:.18em}.wallet-button{padding:9px 10px;font-size:8px}.cinematic-hero{margin-top:-68px;padding-top:92px}.hero-brand-lockup{margin-bottom:20px}.hero-brand-lockup img{width:36px}.system-section{padding:62px 14px}.wireframe-media{min-height:440px}.pieces-heading h2{font-size:54px}.pieces-grid{grid-template-columns:1fr}.pieces-grid article{min-height:260px}.piece-visual span{font-size:74px}.final-command>div>img{width:58px}.console-metrics strong{font-size:32px}
 }
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+
+/* Approved hero motion layer — staged, cinematic, and layout-preserving */
+.cinematic-hero {
+  --visual-x:0px;
+  --visual-y:0px;
+  --visual-scroll-y:0px;
+  --visual-scale:1;
+  --copy-x:0px;
+  --copy-y:0px;
+  --copy-scroll-y:0px;
+  --copy-opacity:1;
+  --frame-x:0px;
+  --frame-y:0px;
+  --scene-opacity:1;
+  --glow-shift:54%;
+}
+.cinematic-visual {
+  opacity:var(--scene-opacity);
+  transform:translate3d(var(--visual-x),calc(var(--visual-y) + var(--visual-scroll-y)),0) scale(var(--visual-scale));
+  transform-origin:center 58%;
+  will-change:transform,opacity;
+}
+.cinematic-media-frame {
+  position:absolute;
+  inset:-2%;
+  overflow:hidden;
+  opacity:0;
+  transform:translate3d(var(--frame-x),calc(18px + var(--frame-y)),0) scale(1.035);
+  animation:hero-frame-settle .8s .15s cubic-bezier(.16,1,.3,1) forwards;
+  will-change:transform,opacity;
+}
+.cinematic-media-frame img {
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  object-position:center center;
+  animation:hero-camera-drift 12s 1.05s ease-in-out infinite alternate;
+  will-change:transform;
+}
+.cinematic-media-frame span {
+  position:absolute;
+  inset:0;
+  z-index:2;
+  background:radial-gradient(circle at var(--glow-shift) 70%,rgba(255,65,23,.18),transparent 21%);
+  mix-blend-mode:screen;
+  animation:hero-glow-drift 13s 1.05s ease-in-out infinite alternate;
+  will-change:transform,opacity;
+}
+.cinematic-copy {
+  opacity:var(--copy-opacity);
+  transform:translate3d(var(--copy-x),calc(var(--copy-y) + var(--copy-scroll-y)),0);
+  will-change:transform,opacity;
+}
+.hero-motion-ambient,
+.hero-motion-rise,
+.hero-motion-heading,
+.hero-motion-frame {
+  opacity:0;
+}
+.hero-motion-ambient {
+  animation:hero-ambient-in .5s ease-out forwards;
+}
+.hero-motion-rise {
+  transform:translate3d(0,22px,0);
+  animation:hero-rise-in .62s cubic-bezier(.16,1,.3,1) forwards;
+}
+.hero-stage-brand { animation-delay:.2s; }
+.hero-stage-kicker { animation-delay:.28s; }
+.hero-stage-body { animation-delay:.45s; }
+.hero-stage-actions { animation-delay:.6s; }
+.hero-heading-mask {
+  overflow:hidden;
+}
+.hero-motion-heading {
+  transform:translate3d(0,38px,0);
+  animation:hero-heading-in .75s .3s cubic-bezier(.16,1,.3,1) forwards;
+  will-change:transform,opacity;
+}
+.hero-motion-frame {
+  transform:translate3d(0,14px,0);
+  animation:hero-frame-in .58s .68s cubic-bezier(.16,1,.3,1) forwards;
+}
+.hero-motion-frame span:nth-child(1) { animation:hero-label-float 9s 1.3s ease-in-out infinite alternate; }
+.hero-motion-frame span:nth-child(2) { animation:hero-label-float 12s 1.9s ease-in-out infinite alternate-reverse; }
+.hero-motion-frame span:nth-child(3) { animation:hero-label-float 10s 2.4s ease-in-out infinite alternate; }
+.hero-motion-frame span:nth-child(4) { animation:hero-label-float 14s 1.6s ease-in-out infinite alternate-reverse; }
+.cinematic-hero .primary-button:hover {
+  transform:translateY(-2px) scale(1.015);
+}
+.cinematic-hero .system-link {
+  transition:transform .25s cubic-bezier(.2,.8,.2,1),background .25s ease,border-color .25s ease;
+}
+.cinematic-hero .system-link:hover {
+  transform:translateY(-2px) scale(1.012);
+}
+@keyframes hero-frame-settle {
+  from { opacity:0;transform:translate3d(var(--frame-x),calc(18px + var(--frame-y)),0) scale(1.035); }
+  to { opacity:1;transform:translate3d(var(--frame-x),var(--frame-y),0) scale(1); }
+}
+@keyframes hero-camera-drift {
+  from { transform:translate3d(-3px,-2px,0) scale(1.008); }
+  to { transform:translate3d(4px,3px,0) scale(1.026); }
+}
+@keyframes hero-glow-drift {
+  from { opacity:.5;transform:translate3d(-5px,2px,0) scale(1); }
+  to { opacity:.9;transform:translate3d(7px,-4px,0) scale(1.025); }
+}
+@keyframes hero-ambient-in {
+  from { opacity:0; }
+  to { opacity:1; }
+}
+@keyframes hero-rise-in {
+  from { opacity:0;transform:translate3d(0,22px,0); }
+  to { opacity:1;transform:translate3d(0,0,0); }
+}
+@keyframes hero-heading-in {
+  from { opacity:0;transform:translate3d(0,38px,0); }
+  to { opacity:1;transform:translate3d(0,0,0); }
+}
+@keyframes hero-frame-in {
+  from { opacity:0;transform:translate3d(0,14px,0); }
+  to { opacity:1;transform:translate3d(0,0,0); }
+}
+@keyframes hero-label-float {
+  from { transform:translate3d(0,0,0); }
+  to { transform:translate3d(0,-2px,0); }
+}
+@media(max-width:900px) {
+  .cinematic-visual {
+    transform:translate3d(0,var(--visual-scroll-y),0) scale(var(--visual-scale));
+  }
+  .cinematic-copy {
+    transform:translate3d(0,var(--copy-scroll-y),0);
+  }
+  .cinematic-media-frame {
+    inset:-1%;
+  }
+  .cinematic-media-frame img {
+    animation-duration:15s;
+  }
+  .hero-motion-frame span {
+    animation:none!important;
+  }
+}
+@media(max-width:760px) {
+  .cinematic-media-frame img {
+    object-position:center center;
+  }
+  .hero-motion-rise {
+    transform:translate3d(0,16px,0);
+  }
+  .hero-motion-heading {
+    transform:translate3d(0,26px,0);
+  }
+}
+@media(prefers-reduced-motion:reduce) {
+  .cinematic-visual,
+  .cinematic-media-frame,
+  .cinematic-media-frame img,
+  .cinematic-media-frame span,
+  .cinematic-copy,
+  .hero-motion-ambient,
+  .hero-motion-rise,
+  .hero-motion-heading,
+  .hero-motion-frame,
+  .hero-motion-frame span {
+    animation:none!important;
+    opacity:1!important;
+    transform:none!important;
+  }
+  .hero-motion-ambient,
+  .hero-motion-rise,
+  .hero-motion-heading,
+  .hero-motion-frame {
+    will-change:auto;
+  }
+}

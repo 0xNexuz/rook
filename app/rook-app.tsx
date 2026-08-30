@@ -1,7 +1,7 @@
 'use client';
 /* eslint-disable @next/next/no-img-element -- logo URLs are supplied dynamically by Robinhood's canonical asset API. */
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { robinhoodTestnet } from './chain';
 
 type View = 'home' | 'market' | 'create' | 'rooks' | 'explore';
@@ -85,18 +85,85 @@ function Home(p: RuleProps & { setView:(v:View)=>void }) {
     ['♟','THE LIMIT','Caps each execution, total allocation, and the lifetime of permission.'],
     ['♔','THE OWNER','You remain the final authority: activate, pause, edit, or revoke at any time.'],
   ];
+  const heroRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const hero = heroRef.current;
+    if (!hero) return;
+
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const finePointer = window.matchMedia('(pointer: fine) and (min-width: 901px)');
+    let frame = 0;
+    let targetX = 0;
+    let targetY = 0;
+    let currentX = 0;
+    let currentY = 0;
+
+    const renderPointer = () => {
+      currentX += (targetX - currentX) * 0.075;
+      currentY += (targetY - currentY) * 0.075;
+      hero.style.setProperty('--visual-x', (currentX * 8).toFixed(2) + 'px');
+      hero.style.setProperty('--visual-y', (currentY * 5).toFixed(2) + 'px');
+      hero.style.setProperty('--copy-x', (currentX * -6).toFixed(2) + 'px');
+      hero.style.setProperty('--copy-y', (currentY * -4).toFixed(2) + 'px');
+      hero.style.setProperty('--frame-x', (currentX * 4).toFixed(2) + 'px');
+      hero.style.setProperty('--frame-y', (currentY * 3).toFixed(2) + 'px');
+      if (Math.abs(targetX - currentX) > 0.002 || Math.abs(targetY - currentY) > 0.002) {
+        frame = window.requestAnimationFrame(renderPointer);
+      }
+    };
+
+    const onPointerMove = (event: PointerEvent) => {
+      if (reducedMotion.matches || !finePointer.matches) return;
+      const rect = hero.getBoundingClientRect();
+      targetX = Math.max(-1, Math.min(1, ((event.clientX - rect.left) / rect.width - 0.5) * 2));
+      targetY = Math.max(-1, Math.min(1, ((event.clientY - rect.top) / rect.height - 0.5) * 2));
+      window.cancelAnimationFrame(frame);
+      frame = window.requestAnimationFrame(renderPointer);
+    };
+
+    const resetPointer = () => {
+      targetX = 0;
+      targetY = 0;
+      window.cancelAnimationFrame(frame);
+      frame = window.requestAnimationFrame(renderPointer);
+    };
+
+    const onScroll = () => {
+      if (reducedMotion.matches) return;
+      const rect = hero.getBoundingClientRect();
+      const progress = Math.max(0, Math.min(1, -rect.top / Math.max(rect.height, 1)));
+      hero.style.setProperty('--visual-scroll-y', (progress * 22).toFixed(2) + 'px');
+      hero.style.setProperty('--visual-scale', (1 + progress * 0.018).toFixed(4));
+      hero.style.setProperty('--scene-opacity', (1 - progress * 0.16).toFixed(3));
+      hero.style.setProperty('--copy-scroll-y', (progress * -34).toFixed(2) + 'px');
+      hero.style.setProperty('--copy-opacity', (1 - progress * 0.34).toFixed(3));
+    };
+
+    hero.addEventListener('pointermove', onPointerMove);
+    hero.addEventListener('pointerleave', resetPointer);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+    return () => {
+      window.cancelAnimationFrame(frame);
+      hero.removeEventListener('pointermove', onPointerMove);
+      hero.removeEventListener('pointerleave', resetPointer);
+      window.removeEventListener('scroll', onScroll);
+    };
+  }, []);
+
   return <div className="home-v2">
-    <section className="command-hero cinematic-hero">
-      <div className="cinematic-visual" aria-hidden="true"><img src="/hero-rook-web3.png" alt=""/><span/></div>
-      <div className="hero-serial"><span>ROOK / ROBINHOOD_CHAIN</span><span>WEB3 AUTOMATION · 001</span></div>
+    <section className="command-hero cinematic-hero" ref={heroRef}>
+      <div className="cinematic-visual" aria-hidden="true"><div className="cinematic-media-frame"><img src="/hero-rook-web3.png" alt=""/><span/></div></div>
+      <div className="hero-serial hero-motion-ambient"><span>ROOK / ROBINHOOD_CHAIN</span><span>WEB3 AUTOMATION · 001</span></div>
       <div className="cinematic-copy">
-        <div className="hero-brand-lockup"><img src="/rook-mark.png" alt=""/><span>ROOK PROTOCOL</span></div>
-        <p className="cinematic-kicker"><i/> PROGRAMMABLE MARKETS</p>
-        <h1>COMMAND<br/><span>THE MOVE.</span></h1>
-        <p>Turn market intent into a guarded onchain position. Build the rule, simulate every outcome, and authorize only the move you want Rook to make.</p>
-        <div className="hero-actions hero-actions-v2"><button className="primary-button" onClick={()=>p.setView('create')}>BUILD YOUR ROOK <span>→</span></button><button className="system-link" onClick={()=>p.setView('explore')}>EXPLORE STRATEGIES ↗</button></div>
+        <div className="hero-brand-lockup hero-motion-rise hero-stage-brand"><img src="/rook-mark.png" alt=""/><span>ROOK PROTOCOL</span></div>
+        <p className="cinematic-kicker hero-motion-rise hero-stage-kicker"><i/> PROGRAMMABLE MARKETS</p>
+        <div className="hero-heading-mask"><h1 className="hero-motion-heading">COMMAND<br/><span>THE MOVE.</span></h1></div>
+        <p className="hero-motion-rise hero-stage-body">Turn market intent into a guarded onchain position. Build the rule, simulate every outcome, and authorize only the move you want Rook to make.</p>
+        <div className="hero-actions hero-actions-v2 hero-motion-rise hero-stage-actions"><button className="primary-button" onClick={()=>p.setView('create')}>BUILD YOUR ROOK <span>→</span></button><button className="system-link" onClick={()=>p.setView('explore')}>EXPLORE STRATEGIES ↗</button></div>
       </div>
-      <div className="cinematic-footer"><span>01 / SIGNAL</span><span>02 / SIMULATE</span><span>03 / PERMISSION</span><span>04 / EXECUTE</span></div>
+      <div className="cinematic-footer hero-motion-frame"><span>01 / SIGNAL</span><span>02 / SIMULATE</span><span>03 / PERMISSION</span><span>04 / EXECUTE</span></div>
     </section>
 
     <section className="system-section control-section">
